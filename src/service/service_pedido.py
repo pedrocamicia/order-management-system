@@ -17,16 +17,15 @@ class PedidoService:
     def confirmar_pedido(self, pedido_id):
         try:
             pedido : Pedido= self.repositorio_pedidos.get_pedido(pedido_id)
-            productos_pedido = []
-            for item in pedido.items: 
-                productos_pedido.append(self.repositorio_productos.get_producto(item.producto_id))
-            
-            for producto in productos_pedido: 
-                producto.disponible_para_venta(item.cantidad)
 
+            for item in pedido.items:
+                producto = self.repositorio_productos.get_producto(item.producto_id)
+                producto.disponible_para_venta(item.cantidad)
+            
             pedido.confirmar_pedido()
 
-            for producto in productos_pedido:
+            for item in pedido.items:
+                producto = self.repositorio_productos.get_producto(item.producto_id)
                 producto.descontar_stock(item.cantidad)
                 self.repositorio_productos.actualizar_producto(producto)
                 
@@ -34,10 +33,10 @@ class PedidoService:
             
             self.conn.commit()
             
-        except DomainException as e:
+        except Exception:
             self.conn.rollback()
-            print(e)
-    
+            raise
+                
         
 ############# agregar al carrito ########################################
         

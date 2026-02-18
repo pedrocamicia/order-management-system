@@ -48,8 +48,8 @@ class RepositorioProductos:
     def actualizar_producto(self, producto : Producto):
         with self.conn.cursor() as cursor:
             cursor.execute("""
-                UPDATE productos SET precio = %s, stock = %s, estado = %s WEHRE id = %s
-            """, (producto.precio, producto.stock, producto.estado, producto.id))
+                UPDATE productos SET precio = %s, stock = %s, estado = %s WHERE id = %s
+            """, (producto.precio, producto.stock, producto.estado.codigo(), producto.id))
             
             
             

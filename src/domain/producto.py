@@ -11,7 +11,7 @@ class Producto:
 
     def disponible_para_venta(self, cantidad):
         if not self.esta_disponible():
-            raise ProductoNoDisponible("no se puede agragr al carrito, el prodcuto no esta disponible")
+            raise ProductoNoDisponible(f"el prodcuto: {self.nombre} no esta disponible")
         self.validar_stock(cantidad)
         
         
@@ -20,7 +20,7 @@ class Producto:
     
     def validar_stock(self, cantidad):
         if cantidad > self.stock:
-            raise CantidadDeProductoNoDisponibleEnStock(f"la cantidad ingresada del prodcuto no esta disponible en stock. Se encuentra disponibles: {self.stock} unidades")
+            raise CantidadDeProductoNoDisponibleEnStock(f"la cantidad ingresada: {cantidad} del prodcuto: {self.nombre} no esta disponible en stock. Se encuentra disponibles: {self.stock} unidades")
 
 
 

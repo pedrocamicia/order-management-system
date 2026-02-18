@@ -54,7 +54,6 @@ class Pedido:
     def validar_confirmacion(self):
         if not self.estado.puede_confirmarse():
             raise EstadoPedidoInvalido(f"no se puede confirmar el pedido desde el estado acutal: {self.estado.codigo()}")
-        
         self.contenido_valido()
             
     def contenido_valido(self):
