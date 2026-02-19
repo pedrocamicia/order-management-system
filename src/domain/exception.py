@@ -17,6 +17,7 @@ class PedidoVacioInvalido(DomainException):
     pass
 
 
+
 class NotFound(Exception):
     pass
 
@@ -24,4 +25,7 @@ class PedidoNoExistenteError(NotFound):
     pass
 
 class ProductoNoExistenteError(NotFound):
+    pass
+
+class ClienteNoExistente(NotFound):
     pass

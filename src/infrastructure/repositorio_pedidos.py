@@ -15,6 +15,13 @@ class RepositorioPedidos:
         if estado_str == "confirmado":
             return Confirmado()
         
+    def map_pedido(self, id, cliente_id, estado, fecha_confirmacion):
+        pedido = Pedido(id, cliente_id)
+        
+        pedido.estado =self.map_estado(estado)
+        pedido.fecha_confirmacion = fecha_confirmacion
+        return pedido
+    
     #########################################
     
     def crear_tabla_pedidos(self):
@@ -83,10 +90,7 @@ class RepositorioPedidos:
             if row is None:
                 raise PedidoNoExistenteError(f"el pedido con id: {id} no existe")
             
-            pedido = Pedido(row[0], row[1])
-            
-            pedido.estado =self.map_estado(row[2])
-            pedido.fecha_confirmacion = row[3]
+            pedido = self.map_pedido(row[0], row[1], row[2], row[3])
             
             cursor.execute("""
                 SELECT producto_id, cantidad, precio_unitario FROM items WHERE pedido_id = %s
@@ -106,4 +110,11 @@ class RepositorioPedidos:
         with self.conn.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO pedidos (estado, cliente_id, fecha_confirmacion) VALUES (%s, %s, %s)
+                RETURNING id
                 """,(pedido.estado.codigo(), pedido.cliente_id, pedido.fecha_confirmacion))
+            
+            pedido_id  = cursor.fetchone()[0]
+            
+            pedido.id = pedido_id
+
+            return pedido

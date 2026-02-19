@@ -2,14 +2,31 @@ from src.domain.pedido import Pedido
 from src.domain.producto import Producto
 from src.infrastructure.repositorio_pedidos import RepositorioPedidos
 from src.infrastructure.repositorio_productos import RepositorioProductos
+from src.infrastructure.repositorio_clientes import RepositorioCliente
 from psycopg2.extensions import connection
 from src.domain.exception import DomainException
 
 class PedidoService:
-    def __init__(self, repositorio_pedidios : RepositorioPedidos, repositorio_productos : RepositorioProductos, conn : connection):
+    def __init__(self, repositorio_pedidios : RepositorioPedidos, repositorio_productos : RepositorioProductos, repositorio_clientes : RepositorioCliente,conn : connection):
         self.repositorio_pedidos = repositorio_pedidios
         self.repositorio_productos = repositorio_productos
+        self.repositorio_clientes = repositorio_clientes
         self.conn = conn
+    
+############# iniciar pedido ###################################################
+
+    def iniciar_pedido(self, cliente_id):
+        try:
+            self.repositorio_clientes.get_cliente(cliente_id)
+
+            pedido = self.repositorio_pedidos.crear_pedido(Pedido(None, cliente_id))        
+            
+            self.conn.commit()
+            
+            return pedido
+        except Exception:
+            self.conn.rollback()
+            raise
     
 ############### confirmar pedido ################################################    
     
@@ -41,15 +58,18 @@ class PedidoService:
 ############# agregar al carrito ########################################
         
     def agregar_producto(self, pedido_id,producto_id, cantidad):
-        pedido : Pedido = self.repositorio_pedidos.get_pedido(pedido_id)
-        producto : Producto = self.repositorio_productos.get_producto(producto_id)
-        
-        producto.disponible_para_venta(cantidad)
+        try:
+            pedido : Pedido = self.repositorio_pedidos.get_pedido(pedido_id)
+            producto : Producto = self.repositorio_productos.get_producto(producto_id)
+            
+            producto.disponible_para_venta(cantidad)
 
-        pedido.agregar_producto(producto, cantidad)
-                
-        self.repositorio_pedidos.actualizar_pedido(pedido)
-                
-        self.repositorio_pedidos.conn.commit()
-        
+            pedido.agregar_producto(producto, cantidad)
+                    
+            self.repositorio_pedidos.actualizar_pedido(pedido)
+                    
+            self.repositorio_pedidos.conn.commit()
+        except Exception:
+            self.conn.rollback()
+            raise
         

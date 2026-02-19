@@ -1,5 +1,6 @@
 from psycopg2.extensions import connection
 from src.domain.cliente import Cliente
+from src.domain.exception import ClienteNoExistente
 
 class RepositorioCliente:
     def __init__(self, conn : connection):
@@ -24,3 +25,13 @@ class RepositorioCliente:
         with self.conn.cursor() as cursor:
             cursor.execute("INSERT INTO clientes (nombre) VALUES (%s)", (cliente.nombre,))
             
+            
+    def get_cliente(self, cliente_id):
+        with self.conn.cursor() as cursor:
+            cursor.execute("SELECT id, nombre FROM clientes WHERE id = %s", (cliente_id,))
+            
+            row = cursor.fetchone()
+            if row is None:
+                raise ClienteNoExistente(f"el id del cliente ingresado: {cliente_id} no existe")
+            
+            return Cliente(*row)

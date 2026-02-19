@@ -48,7 +48,7 @@ def crear_contexto():
     
     conn.commit()
     
-    return conn, repo_pedidos, repo_productos, PedidoService(repo_pedidos, repo_productos, conn)
+    return conn, repo_pedidos, repo_productos,repo_clientes, PedidoService(repo_pedidos, repo_productos,repo_clientes, conn)
 
 
 
@@ -63,7 +63,7 @@ def limpiar_db(conn):
  
 def test_agregar_producto_a_pedido():
     try:
-        conn, repo_pedidos, repo_productos, pedido_service = crear_contexto()
+        conn, repo_pedidos, repo_productos, repo_clientes,pedido_service = crear_contexto()
         
         pedido_service.agregar_producto(1, 1, 5)
 
@@ -93,7 +93,7 @@ def test_agregar_producto_a_pedido():
 
 def test_agregar_producto_cantidad_0_o_negativa_falla():
     try:
-        conn, repo_pedidos, repo_productos, pedido_service = crear_contexto()
+        conn, repo_pedidos, repo_productos, repo_clientes,pedido_service = crear_contexto()
         
         with pytest.raises(CantidadInvalida):
             pedido_service.agregar_producto(1, 1, 0)
@@ -111,7 +111,7 @@ def test_agregar_producto_cantidad_0_o_negativa_falla():
         
 def test_agregar_producto_no_disponible_falla():
     try:
-        conn, repo_pedidos, repo_productos, pedido_service = crear_contexto()
+        conn, repo_pedidos, repo_productos, repo_clientes,pedido_service = crear_contexto()
         
         with pytest.raises(ProductoNoDisponible):
             pedido_service.agregar_producto(1, 3, 5)
@@ -129,7 +129,7 @@ def test_agregar_producto_no_disponible_falla():
         
 def test_agregar_producto_cantidad_mayor_a_stock_falla():
     try:
-        conn, repo_pedidos, repo_productos, pedido_service = crear_contexto()
+        conn, repo_pedidos, repo_productos, repo_clientes,pedido_service = crear_contexto()
         
         with pytest.raises(CantidadDeProductoNoDisponibleEnStock):
             pedido_service.agregar_producto(1, 2, 16)
@@ -146,7 +146,7 @@ def test_agregar_producto_cantidad_mayor_a_stock_falla():
 
 def test_agregar_producto_a_pedido_confirmado_falla():
     try:
-        conn, repo_pedidos, repo_productos, pedido_service = crear_contexto()
+        conn, repo_pedidos, repo_productos, repo_clientes,pedido_service = crear_contexto()
         
         with pytest.raises(EstadoPedidoInvalido):
             pedido_service.agregar_producto(2, 2, 1)
@@ -165,7 +165,7 @@ def test_agregar_producto_a_pedido_confirmado_falla():
 
 def test_confirmar_pedido():
     try:
-        conn, repo_pedidos, repo_productos, pedido_service = crear_contexto()
+        conn, repo_pedidos, repo_productos, repo_clientes,pedido_service = crear_contexto()
         
         pedido_service.agregar_producto(1,1,10) 
         pedido_service.agregar_producto(1,2,5)
@@ -190,7 +190,7 @@ def test_confirmar_pedido():
 
 def test_confirmar_pedido_con_producto_no_disponible_falla():
     try:
-        conn, repo_pedidos, repo_productos, pedido_service = crear_contexto()
+        conn, repo_pedidos, repo_productos, repo_clientes,pedido_service = crear_contexto()
         
         pedido_service.agregar_producto(1,1,10) 
         pedido_service.agregar_producto(1,2,5)
@@ -222,7 +222,7 @@ def test_confirmar_pedido_con_producto_no_disponible_falla():
 
 def test_confirmar_pedido_falta_stock_falla():
     try:
-        conn, repo_pedidos, repo_productos, pedido_service = crear_contexto()
+        conn, repo_pedidos, repo_productos, repo_clientes,pedido_service = crear_contexto()
         
         pedido_service.agregar_producto(1,1,10) 
         pedido_service.agregar_producto(1,2,5)
@@ -253,7 +253,7 @@ def test_confirmar_pedido_falta_stock_falla():
 
 def test_confirmar_pedido_vacio_falla():
     try:
-        conn, repo_pedidos, repo_productos, pedido_service = crear_contexto()
+        conn, repo_pedidos, repo_productos, repo_clientes,pedido_service = crear_contexto()
         
         with pytest.raises(PedidoVacioInvalido):
             pedido_service.confirmar_pedido(1)
@@ -276,7 +276,7 @@ def test_confirmar_pedido_vacio_falla():
 
 def test_confirmar_pedido_confirmado_falla():
     try:
-        conn, repo_pedidos, repo_productos, pedido_service = crear_contexto()
+        conn, repo_pedidos, repo_productos, repo_clientes,pedido_service = crear_contexto()
         
         pedido_service.agregar_producto(1,1,5)
         
