@@ -60,4 +60,11 @@ class RepositorioProductos:
         with self.conn.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO productos (nombre,precio , stock, estado) VALUES (%s,%s,%s,%s)
+                RETURNING id
             """, (producto.nombre,producto.precio, producto.stock, producto.estado.codigo()))
+            
+            producto_id = cursor.fetchone()[0]
+            
+            producto.id = producto_id
+            return producto
+            

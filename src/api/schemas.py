@@ -4,6 +4,14 @@ from pydantic import BaseModel
 class PedidoCreateRequest(BaseModel):
     cliente_id : int
 
+class ClienteCreateRequest(BaseModel):
+    nombre : str
+
+class ProductoCreateRequest(BaseModel):
+    nombre : str
+    precio : int
+    stock : int
+    
 
 
 ##### response
@@ -35,3 +43,30 @@ class PedidoDetalleResponse(BaseModel):
     items : list[ItemResponse]
     total : float
     
+class ClienteCreateResponse(BaseModel):
+    id : int
+    nombre : str
+    
+    @classmethod
+    def from_domain(cls, cliente):
+        return cls(
+            id = cliente.id,
+            nombre = cliente.nombre
+        )
+
+class ProductoCreateResponse(BaseModel):
+    id : int
+    nombre : str
+    precio : int
+    stock : int 
+    estado : str
+    
+    @classmethod
+    def from_domain(cls, producto):
+        return cls(
+            id = producto.id,
+            nombre = producto.nombre,
+            precio = producto.precio,
+            stock = producto.stock,
+            estado = producto.estado.codigo()
+        )

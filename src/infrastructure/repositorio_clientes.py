@@ -23,8 +23,15 @@ class RepositorioCliente:
             
     def guardar_cliente(self, cliente : Cliente):
         with self.conn.cursor() as cursor:
-            cursor.execute("INSERT INTO clientes (nombre) VALUES (%s)", (cliente.nombre,))
+            cursor.execute("""
+                INSERT INTO clientes (nombre) VALUES (%s)
+                RETURNING id
+            """, (cliente.nombre,))
             
+            cliente_id = cursor.fetchone()[0]
+            
+            cliente.id = cliente_id
+            return cliente
             
     def get_cliente(self, cliente_id):
         with self.conn.cursor() as cursor:
