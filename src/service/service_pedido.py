@@ -60,6 +60,8 @@ class PedidoService:
             
             self.conn.commit()
             
+            return pedido   
+        
         except Exception:
             self.conn.rollback()
             raise

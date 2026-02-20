@@ -27,3 +27,9 @@ def get_pedido(pedido_id : int):
     pedido = service.get_pedido(pedido_id)
     
     return PedidoDetalleResponse.from_domain(pedido)
+
+@router.patch("/pedidos/{pedido_id}/confirmar", status_code=200, response_model=PedidoDetalleResponse)
+def confirmar_pedido(pedido_id : int):
+    pedido = service.confirmar_pedido(pedido_id)
+    
+    return PedidoDetalleResponse.from_domain(pedido)
