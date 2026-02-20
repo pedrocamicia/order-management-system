@@ -20,3 +20,12 @@ class ProductoService:
             self.conn.rollback()
             raise    
     
+######### get producto ###################
+
+    def get_producto(self, producto_id):
+        try:
+            producto = self.repositorio_productos.get_producto(producto_id)
+            
+            return producto
+        except:
+            raise

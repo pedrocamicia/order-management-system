@@ -13,6 +13,16 @@ class PedidoService:
         self.repositorio_clientes = repositorio_clientes
         self.conn = conn
     
+############ get pedido #########################################################
+
+    def get_pedido(self, pedido_id : int):
+        try:
+            pedido = self.repositorio_pedidos.get_pedido(pedido_id)
+
+            return pedido
+        except:
+            raise
+    
 ############# iniciar pedido ###################################################
 
     def iniciar_pedido(self, cliente_id):

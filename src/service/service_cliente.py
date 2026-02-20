@@ -19,3 +19,13 @@ class ServiceCliente:
         except Exception:
             self.conn.rollback()
             raise
+        
+    
+    def get_cliente(self, cliente_id : int):
+        try:
+            cliente = self.repositorio_cliente.get_cliente(cliente_id)
+            
+            return cliente
+        
+        except:
+            raise

@@ -66,7 +66,7 @@ class PedidoDetalleResponse(BaseModel):
         )
     
     
-class ClienteCreateResponse(BaseModel):
+class ClienteResponse(BaseModel):
     id : int
     nombre : str
     
@@ -77,7 +77,7 @@ class ClienteCreateResponse(BaseModel):
             nombre = cliente.nombre
         )
 
-class ProductoCreateResponse(BaseModel):
+class ProductoResponse(BaseModel):
     id : int
     nombre : str
     precio : int
