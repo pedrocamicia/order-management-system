@@ -59,13 +59,13 @@ class RepositorioPedidos:
     def actualizar_pedido(self, pedido : Pedido):
         self.actualizar_estado_pedido(pedido)
         self.actualizar_items(pedido)   
-    
+
+
     def actualizar_estado_pedido(self, pedido : Pedido):
         with self.conn.cursor() as cursor:
             cursor.execute("""
                 UPDATE pedidos SET estado = %s, fecha_confirmacion = %s WHERE id = %s
             """, (pedido.estado.codigo(), pedido.fecha_confirmacion, pedido.id))
-            
         
     def actualizar_items(self, pedido : Pedido):
         with self.conn.cursor() as cursor:
@@ -90,7 +90,7 @@ class RepositorioPedidos:
             if row is None:
                 raise PedidoNoExistenteError(f"el pedido con id: {id} no existe")
             
-            pedido = self.map_pedido(row[0], row[1], row[2], row[3])
+            pedido = self.map_pedido(*row)
             
             cursor.execute("""
                 SELECT producto_id, cantidad, precio_unitario FROM items WHERE pedido_id = %s

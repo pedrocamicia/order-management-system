@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from src.api.schemas import PedidoCreadoResponse, PedidoCreateRequest
+from src.api.schemas import PedidoCreadoResponse, PedidoCreateRequest, AgergarProductoAPedidoRequest, PedidoDetalleResponse
 from src.service.service_pedido import PedidoService
 
 router = APIRouter(tags=["Pedidos"])
@@ -15,3 +15,9 @@ async def iniciar_pedido(data : PedidoCreateRequest):
     
     return PedidoCreadoResponse.from_domain(pedido)
 
+@router.post("/pedidos/{pedido_id}/items", status_code=201, response_model= PedidoDetalleResponse)
+async def agregar_producto(data : AgergarProductoAPedidoRequest, pedido_id : int):
+    
+    pedido = service.agregar_producto(pedido_id, data.producto_id, data.cantidad)
+    
+    return PedidoDetalleResponse.from_domain(pedido)

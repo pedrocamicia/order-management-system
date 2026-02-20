@@ -68,7 +68,10 @@ class PedidoService:
                     
             self.repositorio_pedidos.actualizar_pedido(pedido)
                     
-            self.repositorio_pedidos.conn.commit()
+            self.conn.commit()
+            
+            return pedido
+        
         except Exception:
             self.conn.rollback()
             raise
