@@ -13,27 +13,31 @@ class Pedido:
         
 #################################################################
 
-    def agregar_producto(self,producto, cantidad):
+    def set_cantidad(self,producto, cantidad):
         
-        self.validar_agregar_producto(producto, cantidad)
+        self.validar_modificar_producto(producto, cantidad)
         
+        if cantidad == 0:
+            self.eliminar_item(producto.id)
+            return
+            
         if self.hay_producto(producto.id):
-            self.sumar_cantidad_de_producto(producto.id, cantidad)
+            self.set_cantidad_de_producto(producto.id, cantidad)
             return
         
         item = ItemPedido(producto.id, cantidad, producto.precio)
         self.items.append(item) 
         
-    def validar_agregar_producto(self, producto, cantidad):
-        if not self.estado.puede_agregarse_producto():
-            raise EstadoPedidoInvalido(f"no se puede agregar un producto al pedido desde el estado actual: {self.estado.codigo()}")
-        if cantidad <= 0:
-            raise CantidadInvalida("no se puede agregar una cantidad 0 o negativa de profuctos")
+    def validar_modificar_producto(self, producto, cantidad):
+        if not self.estado.puede_modificarse_items_pedido():
+            raise EstadoPedidoInvalido(f"no se puede modificarse un producto del pedido desde el estado actual: {self.estado.codigo()}")
+        if cantidad < 0:
+            raise CantidadInvalida("no se puede ingresar una cantidad negativa de productos")
         
     
-    def sumar_cantidad_de_producto(self, producto_id, cantidad):
+    def set_cantidad_de_producto(self, producto_id, cantidad):
         item = next((i for i in self.items if i.producto_id == producto_id ), None)
-        item.cantidad += cantidad
+        item.cantidad = cantidad
     
     def hay_producto(self, producto_id):
         for item in self.items:
@@ -41,6 +45,13 @@ class Pedido:
                 return True
         return False
     
+    def eliminar_item(self, producto_id):
+        if not self.hay_producto(producto_id):
+            return
+        item = next((i for i in self.items if i.producto_id == producto_id ), None)
+        self.items.remove(item)
+     
+        
 #####################################################
     
     def confirmar_pedido(self):
@@ -82,7 +93,7 @@ class EstadoPedido:
     def codigo(self):
         raise NotImplementedError()
     
-    def puede_agregarse_producto(self):
+    def puede_modificarse_items_pedido(self):
         return False
 
     def puede_confirmarse(self):
@@ -92,7 +103,7 @@ class Carrito(EstadoPedido):
     def codigo(self):
         return "carrito"
     
-    def puede_agregarse_producto(self):
+    def puede_modificarse_items_pedido(self):
         return True
     
     def puede_confirmarse(self):

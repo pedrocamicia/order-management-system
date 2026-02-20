@@ -10,7 +10,7 @@ class Producto:
 
 
     def disponible_para_venta(self, cantidad):
-        if not self.esta_disponible():
+        if not self.esta_disponible() and cantidad != 0: 
             raise ProductoNoDisponible(f"el prodcuto: {self.nombre} no esta disponible")
         self.validar_stock(cantidad)
         

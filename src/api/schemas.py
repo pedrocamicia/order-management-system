@@ -13,7 +13,7 @@ class ProductoCreateRequest(BaseModel):
     precio : int
     stock : int
     
-class AgergarProductoAPedidoRequest(BaseModel):
+class ModificarItemsPedidoRequest(BaseModel):
     producto_id : int
     cantidad : int
 
