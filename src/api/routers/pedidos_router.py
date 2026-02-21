@@ -15,7 +15,7 @@ async def iniciar_pedido(data : PedidoCreateRequest):
     
     return PedidoCreadoResponse.from_domain(pedido)
 
-@router.put("/pedidos/{pedido_id}/items", status_code=201, response_model= PedidoDetalleResponse)
+@router.patch("/pedidos/{pedido_id}/items", status_code=201, response_model= PedidoDetalleResponse)
 async def modificar_items_pedido(data : ModificarItemsPedidoRequest, pedido_id : int):
     
     pedido = service.modificar_items_pedido(pedido_id, data.producto_id, data.cantidad)
