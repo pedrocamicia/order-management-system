@@ -94,19 +94,19 @@ If quantity becomes zero, the item is removed from the order.
 
 ## API Endpoints
 
-Clients
+### Clients
 
 POST /clientes
 
 GET /clientes/{id}
 
-Products
+### Products
 
 POST /productos
 
 GET /productos/{id}
 
-Orders
+### Orders
 
 POST /pedidos
 
@@ -142,9 +142,9 @@ http://localhost:8000/docs
 
 ## Tests
 
-Run tests using:
+### Run tests using:
 
-pytest
+'pytest'
 
 The project includes:
 

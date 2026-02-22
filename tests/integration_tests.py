@@ -437,3 +437,32 @@ def test_iniciar_pedido_con_exito():
 
     finally:
         limpiar_db(conn)
+        
+############### eliminar item #################
+
+def test_eliminar_item():
+    try:
+        conn, repo_pedidos, repo_productos, repo_clientes, pedido_service = crear_contexto()
+
+        pedido_service.modificar_items_pedido(1, 1, 3)
+        pedido_service.modificar_items_pedido(1, 2, 2)
+
+        pedido_service.eliminar_item(1, 1)
+
+        pedido_actualizado = repo_pedidos.get_pedido(1)
+        assert len(pedido_actualizado.items) == 1
+        assert pedido_actualizado.items[0].producto_id == 2
+        assert pedido_actualizado.items[0].cantidad == 2
+        assert pedido_actualizado.total() == 10
+
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT COUNT(*) FROM items WHERE pedido_id = %s AND producto_id = %s",
+                (1, 1),
+            )
+            cantidad_items_producto_eliminado = cursor.fetchone()[0]
+
+        assert cantidad_items_producto_eliminado == 0
+
+    finally:
+        limpiar_db(conn)

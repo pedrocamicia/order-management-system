@@ -33,3 +33,8 @@ def confirmar_pedido(pedido_id : int):
     pedido = service.confirmar_pedido(pedido_id)
     
     return PedidoDetalleResponse.from_domain(pedido)
+
+@router.delete("/pedidos/{pedido_id}/items/{producto_id}", status_code= 204)
+def eliminar_item(pedido_id : int, producto_id : int):
+    service.eliminar_item(pedido_id, producto_id)
+    return

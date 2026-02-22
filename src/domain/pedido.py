@@ -36,7 +36,7 @@ class Pedido:
         
     
     def set_cantidad_de_producto(self, producto_id, cantidad):
-        item = next((i for i in self.items if i.producto_id == producto_id ), None)
+        item = self.buscar_item(producto_id)
         item.cantidad = cantidad
     
     def hay_producto(self, producto_id):
@@ -48,9 +48,12 @@ class Pedido:
     def eliminar_item(self, producto_id):
         if not self.hay_producto(producto_id):
             return
-        item = next((i for i in self.items if i.producto_id == producto_id ), None)
+        item = self.buscar_item(producto_id)
         self.items.remove(item)
      
+    def buscar_item(self, producto_id):
+        item = next((i for i in self.items if i.producto_id == producto_id ), None)
+        return item
         
 #####################################################
     

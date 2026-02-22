@@ -87,4 +87,19 @@ class PedidoService:
         except Exception:
             self.conn.rollback()
             raise
-        
+
+##########  eliminar producto ####################
+
+    def eliminar_item(self, pedido_id, producto_id): #ver, desde api no elimina el item. o al menos cuando hago get me sigue saliendo el item
+        try:
+            producto = self.repositorio_productos.get_producto(producto_id)
+            pedido = self.repositorio_pedidos.get_pedido(pedido_id)
+            
+            pedido.eliminar_item(producto_id)
+            
+            self.repositorio_pedidos.actualizar_pedido(pedido)
+            
+            self.conn.commit()
+        except:
+            self.conn.rollback()
+            raise
