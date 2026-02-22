@@ -42,6 +42,36 @@ class RepositorioProductos:
             producto.estado = self.map_estado(row[4])
             
             return producto
+####################################################################
+
+    def get_productos(self, limit : int , offset : int):
+        with self.conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT id, nombre, precio, stock, estado FROM productos
+                ORDER BY id
+                LIMIT (%s) OFFSET (%s)
+            """, (limit, offset))
+            
+            rows = cursor.fetchall()
+            
+            productos = []
+            for r in rows:
+                producto = Producto(r[0], r[1], r[2], r[3])
+                producto.estado = self.map_estado(r[4])
+                
+                productos.append(producto) 
+             
+            return productos
+        
+        
+    def total_registros(self):
+        with self.conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT COUNT(*) FROM productos
+            """)
+            row = cursor.fetchone()
+            
+            return row[0]
         
 ####################################################################    
     

@@ -16,6 +16,12 @@ class CantidadInvalida(DomainException):
 class PedidoVacioInvalido(DomainException):
     pass
 
+class LimiteInvalidoError(DomainException):
+    pass
+
+class PaginaInvalidaError(DomainException):
+    pass
+
 
 
 class NotFound(Exception):

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from src.api.schemas import ProductoResponse, ProductoCreateRequest
+from src.api.schemas import ProductoResponse, ProductoCreateRequest,ProductoPaginationResponse
 from src.service.service_producto import ProductoService
 
 router = APIRouter(tags=["Productos"])
@@ -21,3 +21,16 @@ def get_producto(producto_id : int):
     producto = service.get_producto(producto_id)
     
     return ProductoResponse.from_domain(producto)
+
+@router.get("/productos", status_code=200, response_model= ProductoPaginationResponse) #agregar: que pasa si no hay registros. y que pasa si page > pages_total
+def get_productos(page : int, limit : int):
+    
+    productos,total,total_pages = service.get_productos(page, limit)
+    
+    return ProductoPaginationResponse(
+        productos = [ProductoResponse.from_domain(producto) for producto in productos],
+        total = total,
+        page = page,
+        limit = limit,
+        total_pages = total_pages
+    )

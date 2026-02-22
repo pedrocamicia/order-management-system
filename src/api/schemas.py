@@ -94,4 +94,9 @@ class ProductoResponse(BaseModel):
             estado = producto.estado.codigo()
         )
         
-    
+class ProductoPaginationResponse(BaseModel):
+    productos : list[ProductoResponse]
+    total : int
+    page : int
+    limit : int
+    total_pages : int
