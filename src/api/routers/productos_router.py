@@ -22,10 +22,10 @@ def get_producto(producto_id : int):
     
     return ProductoResponse.from_domain(producto)
 
-@router.get("/productos", status_code=200, response_model= ProductoPaginationResponse) #agregar: que pasa si no hay registros. y que pasa si page > pages_total
-def get_productos(page : int, limit : int):
+@router.get("/productos", status_code=200, response_model= ProductoPaginationResponse) 
+def get_productos(page : int, limit : int, estado : str | None = None, min_price : int|None = None, max_price : int | None= None):
     
-    productos,total,total_pages = service.get_productos(page, limit)
+    productos,total,total_pages = service.get_productos(page, limit, estado, min_price, max_price)
     
     return ProductoPaginationResponse(
         productos = [ProductoResponse.from_domain(producto) for producto in productos],

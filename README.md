@@ -70,7 +70,9 @@ Retrieve order details
 
 Create product
 
-Retrieve product
+Retrieve signle product
+
+List products with pagination and dynamic filters
 
 ### Clients
 
@@ -105,6 +107,13 @@ GET /clientes/{id}
 POST /productos
 
 GET /productos/{id}
+
+GET /productos
+
+- Pagination (limit/page)
+
+- Dynamic filters (estado, min_price, max_price) 
+
 
 ### Orders
 

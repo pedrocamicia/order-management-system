@@ -44,24 +44,48 @@ class RepositorioProductos:
             return producto
 ####################################################################
 
-    def get_productos(self, limit : int , offset : int):
+    def get_productos(self, limit : int , offset : int, estado = None, min_price = None, max_price = None):
+        
+        query = "SELECT id, nombre, precio, stock, estado, COUNT(*) OVER() as total FROM productos"
+        
+        filtros = []
+        parametros = []
+
+        if estado:
+            filtros.append(" estado = (%s)")
+            parametros.append(estado)
+        
+        if min_price:
+            filtros.append(" precio >= (%s)")
+            parametros.append(min_price)
+            
+        if max_price:
+            filtros.append(" precio <= (%s)")
+            parametros.append(max_price)
+            
+        if filtros:
+            query += " WHERE " + " AND ".join(filtros)
+            
+        query += " ORDER BY id LIMIT (%s) OFFSET (%s)"
+        parametros.extend([limit, offset])
+        
         with self.conn.cursor() as cursor:
-            cursor.execute("""
-                SELECT id, nombre, precio, stock, estado FROM productos
-                ORDER BY id
-                LIMIT (%s) OFFSET (%s)
-            """, (limit, offset))
+            cursor.execute(query, parametros)
             
             rows = cursor.fetchall()
-            
             productos = []
             for r in rows:
                 producto = Producto(r[0], r[1], r[2], r[3])
                 producto.estado = self.map_estado(r[4])
                 
                 productos.append(producto) 
-             
-            return productos
+                
+            if rows:
+                total = rows[0][5]
+            else:
+                total = 0
+                
+            return productos, total
         
         
     def total_registros(self):

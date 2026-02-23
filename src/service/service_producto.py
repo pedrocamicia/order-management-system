@@ -36,7 +36,7 @@ class ProductoService:
 
 ####################################################################
 
-    def get_productos(self, page : int, limit : int):
+    def get_productos(self, page : int, limit : int, estado : str, min_price : int, max_price : int):
         if page < 1:
             raise PaginaInvalidaError("se ingreso una pagina negativa o 0")
         if limit < 1 or limit > 100:
@@ -44,9 +44,7 @@ class ProductoService:
         
         offset = (page - 1) * limit
         
-        productos= self.repositorio_productos.get_productos(limit , offset)
-        
-        total = self.repositorio_productos.total_registros()
+        productos, total= self.repositorio_productos.get_productos(limit , offset, estado, min_price, max_price)
         
         total_pages = math.ceil(total / limit) 
         
