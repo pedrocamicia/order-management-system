@@ -1,9 +1,8 @@
 from src.infrastructure.repositorio_productos import RepositorioProductos
 from psycopg2.extensions import connection
 from src.domain.producto import Producto
-from src.domain.exception import PaginaInvalidaError, LimiteInvalidoError
 import math
-
+from src.service.pagination import Page, restricciones_paginacion
 
 class ProductoService:
     def __init__(self, repositorio_productos : RepositorioProductos, conn : connection):
@@ -37,15 +36,11 @@ class ProductoService:
 ####################################################################
 
     def get_productos(self, page : int, limit : int, estado : str, min_price : int, max_price : int):
-        if page < 1:
-            raise PaginaInvalidaError("se ingreso una pagina negativa o 0")
-        if limit < 1 or limit > 100:
-            raise LimiteInvalidoError("se ingreso un limite invalido, menor a 1 o mayor a 100 no esta permitido") 
+        restricciones_paginacion(page, limit)
         
         offset = (page - 1) * limit
         
         productos, total= self.repositorio_productos.get_productos(limit , offset, estado, min_price, max_price)
         
-        total_pages = math.ceil(total / limit) 
-        
-        return productos, total, total_pages
+        return Page(productos, total, page, limit)
+

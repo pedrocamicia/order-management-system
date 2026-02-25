@@ -1,6 +1,10 @@
 from pydantic import BaseModel
 from src.domain.pedido import Pedido
 from src.domain.item_pedido import ItemPedido
+from typing import Generic, TypeVar
+from pydantic.generics import GenericModel
+
+T = TypeVar("T")
 
 class PedidoCreateRequest(BaseModel):
     cliente_id : int
@@ -93,9 +97,10 @@ class ProductoResponse(BaseModel):
             stock = producto.stock,
             estado = producto.estado.codigo()
         )
-        
-class ProductoPaginationResponse(BaseModel):
-    productos : list[ProductoResponse]
+    
+    
+class PaginationResponse(GenericModel, Generic[T]):
+    items : list[T]
     total : int
     page : int
     limit : int

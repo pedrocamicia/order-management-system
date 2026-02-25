@@ -42,3 +42,37 @@ class RepositorioCliente:
                 raise ClienteNoExistente(f"el id del cliente ingresado: {cliente_id} no existe")
             
             return Cliente(*row)
+        
+        
+        
+    def get_clientes(self, limit, offset , nombre):
+        
+        query = "SELECT id, nombre, COUNT(*) OVER() as total from clientes"
+        
+        filters = []
+        params = []
+        
+        if nombre:
+            filters.append("nombre = (%s)")
+            params.append(nombre)
+            
+        if filters:
+            query += " WHERE " + " AND ".join(filters)
+        
+        query += " ORDER BY id LIMIT (%s) OFFSET (%s)"
+        
+        params.extend([limit, offset])
+        
+        with self.conn.cursor() as cursor:
+            cursor.execute(query, params)
+            
+            rows = cursor.fetchall()
+            
+            clientes = []
+            for r in rows:
+                cliente = Cliente(r[0], r[1])
+                clientes.append(cliente)
+                
+            total = rows[0][2]
+            
+            return clientes, total

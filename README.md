@@ -80,6 +80,8 @@ Create client
 
 Retrieve client
 
+List products with pagination and dynamic filters
+
 ## Business Rules
 
 An order cant be confirmed if empty.
@@ -101,6 +103,12 @@ If quantity becomes zero, the item is removed from the order.
 POST /clientes
 
 GET /clientes/{id}
+
+GET /clientes
+
+- Pagination (limit/page)
+ 
+- Dynamic filters (nombre) 
 
 ### Products
 

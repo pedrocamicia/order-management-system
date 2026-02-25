@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from src.api.schemas import ClienteCreateRequest,ClienteResponse
+from src.api.schemas import ClienteCreateRequest,ClienteResponse,PaginationResponse
 from src.service.service_cliente import ServiceCliente
 
 router = APIRouter(tags=["Cllientes"])
@@ -21,3 +21,15 @@ def get_cliente(cliente_id : int):
     cliente = service.get_cliente(cliente_id)
     
     return ClienteResponse.from_domain(cliente)
+
+@router.get("/clientes", status_code=200,response_model=PaginationResponse[ClienteResponse])
+def get_clientes(limit : int, page : int, nombre : str | None = None):
+    _page = service.get_clientes(limit, page, nombre)
+    
+    return PaginationResponse(
+        items = [ClienteResponse.from_domain(cliente) for cliente in _page.items],
+        total = _page.total,
+        page = _page.page,
+        limit = _page.limit,
+        total_pages = _page.total_pages
+    )

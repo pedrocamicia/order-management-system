@@ -1,6 +1,7 @@
 from src.infrastructure.repositorio_clientes import RepositorioCliente
 from psycopg2.extensions import connection
 from src.domain.cliente import Cliente
+from src.service.pagination import Page, restricciones_paginacion
 
 class ServiceCliente:
     def __init__(self, repositorio_cliente : RepositorioCliente, conn : connection):
@@ -29,3 +30,11 @@ class ServiceCliente:
         
         except:
             raise
+    
+    def get_clientes(self, limit, page, nombre):
+        restricciones_paginacion(page, limit)
+        offset = (page - 1)* limit
+        
+        clientes, total = self.repositorio_cliente.get_clientes(limit, offset, nombre)
+        
+        return Page(clientes, total, page,limit)

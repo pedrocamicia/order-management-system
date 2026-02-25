@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from src.api.schemas import ProductoResponse, ProductoCreateRequest,ProductoPaginationResponse
+from src.api.schemas import ProductoResponse, ProductoCreateRequest,PaginationResponse
 from src.service.service_producto import ProductoService
 
 router = APIRouter(tags=["Productos"])
@@ -22,15 +22,15 @@ def get_producto(producto_id : int):
     
     return ProductoResponse.from_domain(producto)
 
-@router.get("/productos", status_code=200, response_model= ProductoPaginationResponse) 
+@router.get("/productos", status_code=200, response_model= PaginationResponse[ProductoResponse]) 
 def get_productos(page : int, limit : int, estado : str | None = None, min_price : int|None = None, max_price : int | None= None):
     
-    productos,total,total_pages = service.get_productos(page, limit, estado, min_price, max_price)
+    page = service.get_productos(page, limit, estado, min_price, max_price)
     
-    return ProductoPaginationResponse(
-        productos = [ProductoResponse.from_domain(producto) for producto in productos],
-        total = total,
-        page = page,
-        limit = limit,
-        total_pages = total_pages
+    return PaginationResponse(
+        items = [ProductoResponse.from_domain(producto) for producto in page.items],
+        total = page.total,
+        page = page.page,
+        limit = page.limit,
+        total_pages = page.total_pages
     )
