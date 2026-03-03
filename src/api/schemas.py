@@ -20,6 +20,11 @@ class ProductoCreateRequest(BaseModel):
 class ModificarItemsPedidoRequest(BaseModel):
     producto_id : int
     cantidad : int
+    
+class RegisterRequest(BaseModel):
+    email : str
+    password : str
+    nombre : str
 
 ##### response
 
@@ -105,3 +110,8 @@ class PaginationResponse(GenericModel, Generic[T]):
     page : int
     limit : int
     total_pages : int
+    
+class UserRegisted(BaseModel):
+    id : int
+    email : str
+    role : str

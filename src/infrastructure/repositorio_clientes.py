@@ -17,16 +17,19 @@ class RepositorioCliente:
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS clientes(
                     id SERIAL PRIMARY KEY,
-                    nombre TEXT NOT NULL
+                    user_id INTEGER NOT NULL,
+                    nombre TEXT NOT NULL,
+                    
+                    FOREIGN KEY (user_id) REFERENCES users(id)           
                 );
             """)
             
-    def guardar_cliente(self, cliente : Cliente):
+    def guardar_cliente(self, cliente : Cliente, user_id : int):
         with self.conn.cursor() as cursor:
             cursor.execute("""
-                INSERT INTO clientes (nombre) VALUES (%s)
+                INSERT INTO clientes (nombre, user_id) VALUES (%s, %s)
                 RETURNING id
-            """, (cliente.nombre,))
+            """, (cliente.nombre, user_id))
             
             cliente_id = cursor.fetchone()[0]
             

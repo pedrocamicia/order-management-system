@@ -90,7 +90,7 @@ class PedidoService:
 
 ##########  eliminar producto ####################
 
-    def eliminar_item(self, pedido_id, producto_id): #ver, desde api no elimina el item. o al menos cuando hago get me sigue saliendo el item
+    def eliminar_item(self, pedido_id, producto_id): 
         try:
             producto = self.repositorio_productos.get_producto(producto_id)
             pedido = self.repositorio_pedidos.get_pedido(pedido_id)
