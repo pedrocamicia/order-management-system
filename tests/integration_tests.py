@@ -11,28 +11,34 @@ from src.infrastructure.repositorio_productos import RepositorioProductos
 from src.infrastructure.repositorio_clientes import RepositorioCliente
 from src.infrastructure.db_config import conectar
 from psycopg2.extensions import connection
-    
+from src.infrastructure.repositorio_users import RepositorioUser
+from src.domain.user import User
 
 def crear_contexto():
     conn : connection= conectar() 
 
     conn.autocommit = False
     
+    repo_users = RepositorioUser(conn)
     repo_pedidos = RepositorioPedidos(conn)
     repo_productos = RepositorioProductos(conn)
     repo_clientes = RepositorioCliente(conn)
+    repo_users.create_table()
     repo_clientes.crear_tabla_clientes()
     repo_pedidos.crear_tabla_pedidos()
     repo_productos.crear_tabla_productos()
     repo_pedidos.crear_tabla_items()
 
-    pedro = Cliente(None,"pedro") #id = 1
-    repo_clientes.guardar_cliente(pedro)
+    _user_pedro = User(None, "mail", "1234", None)
+    user_pedro = repo_users.guardar_user(_user_pedro)
+
+    _pedro = Cliente(None,"pedro") #id = 1
+    pedro = repo_clientes.guardar_cliente(_pedro, user_pedro.id)
     
-    pedido = Pedido(None, 1)    #id = 1
+    pedido = Pedido(None, pedro.id)    #id = 1
     repo_pedidos.crear_pedido(pedido)
     
-    pedido2 = Pedido(None, 1)  #id = 2
+    pedido2 = Pedido(None, pedro.id)  #id = 2
     pedido2.estado = Confirmado()
     repo_pedidos.crear_pedido(pedido2)
     
@@ -54,7 +60,7 @@ def crear_contexto():
 
 def limpiar_db(conn):
     with conn.cursor() as cursor:
-        cursor.execute("TRUNCATE TABLE items, pedidos, productos, clientes RESTART IDENTITY CASCADE")              
+        cursor.execute("TRUNCATE TABLE users,items, pedidos, productos, clientes RESTART IDENTITY CASCADE")              
 
         conn.commit()
 

@@ -22,6 +22,9 @@ class LimiteInvalidoError(DomainException):
 class PaginaInvalidaError(DomainException):
     pass
 
+class ExistentEmailError(DomainException):
+    pass
+
 
 
 class NotFound(Exception):

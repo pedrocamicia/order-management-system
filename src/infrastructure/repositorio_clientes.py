@@ -17,8 +17,8 @@ class RepositorioCliente:
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS clientes(
                     id SERIAL PRIMARY KEY,
-                    user_id INTEGER NOT NULL,
                     nombre TEXT NOT NULL,
+                    user_id INTEGER NOT NULL,
                     
                     FOREIGN KEY (user_id) REFERENCES users(id)           
                 );
@@ -35,6 +35,7 @@ class RepositorioCliente:
             
             cliente.id = cliente_id
             return cliente
+           
             
     def get_cliente(self, cliente_id):
         with self.conn.cursor() as cursor:
@@ -44,7 +45,10 @@ class RepositorioCliente:
             if row is None:
                 raise ClienteNoExistente(f"el id del cliente ingresado: {cliente_id} no existe")
             
-            return Cliente(*row)
+            return Cliente(
+                id = row[0],
+                nombre=row[1]
+            )
         
         
         

@@ -5,6 +5,17 @@ class RepositorioUser:
     def __init__(self, conn : connection):
         self.conn = conn
     
+    def map_user(self, row):
+        
+        return User(
+            id=row[0],
+            email=row[1],
+            hashed_password=row[2],
+            role=row[3]
+        )
+    
+    #####################################################
+    
     def create_table(self):
         with self.conn.cursor() as cursor:
             cursor.execute("""
@@ -16,6 +27,8 @@ class RepositorioUser:
                 );
             """)
             self.conn.commit()
+            
+    #########################################################            
             
     def guardar_user(self, user : User):
         with self.conn.cursor() as cursor:
@@ -32,3 +45,40 @@ class RepositorioUser:
             
             return user
             
+    ##############################################################       
+            
+    def get_user_by_mail(self, mail : str):
+        with self.conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT * FROM users WHERE email = (%s)
+                """, (mail,))
+            
+            row = cursor.fetchone()
+            
+            if not row:
+                return None
+            
+            user = self.map_user(row)
+            
+            self.conn.commit()
+            
+            return user
+        
+    ##############################################################       
+            
+    def get_user_by_id(self, id : int):
+        with self.conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT * FROM users WHERE id = (%s)
+                """, (id,))
+            
+            row = cursor.fetchone()
+            
+            if not row:
+                return None
+            
+            user = self.map_user(row)
+            
+            self.conn.commit()
+            
+            return user

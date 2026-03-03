@@ -2,7 +2,7 @@ from src.infrastructure.repositorio_users import RepositorioUser,User
 from src.infrastructure.repositorio_clientes import RepositorioCliente,Cliente
 from psycopg2.extensions import connection
 from src.infrastructure.security import password
-
+from src.domain.exception import ExistentEmailError
 class AuthService:
     def __init__(self, repositorio_users : RepositorioUser,repositorio_clientes : RepositorioCliente, conn : connection ):
         self.repositorio_users = repositorio_users
@@ -11,7 +11,9 @@ class AuthService:
         
     def register(self, email : str, nombre : str,_password : str):
         try:
-            #incluir cerificacion de que el user con el mail no exista ya
+            _user = self.repositorio_users.get_user_by_mail(email)
+            if _user:
+                raise ExistentEmailError("el mail ingersado ya se encuentra registrado en otra cuenta")
             
             hashed_password = password.hash_password(_password)
             
