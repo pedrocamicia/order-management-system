@@ -27,6 +27,8 @@ class ExistentEmailError(DomainException):
 
 
 
+###########################################
+
 class NotFound(Exception):
     pass
 
@@ -37,4 +39,12 @@ class ProductoNoExistenteError(NotFound):
     pass
 
 class ClienteNoExistente(NotFound):
+    pass
+
+################################################
+
+class AuthException(Exception):
+    pass
+
+class InvalidCredentials(AuthException):
     pass

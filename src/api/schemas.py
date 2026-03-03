@@ -26,7 +26,12 @@ class RegisterRequest(BaseModel):
     password : str
     nombre : str
 
-##### response
+
+class LoginRequest(BaseModel):
+    email : str
+    password : str
+
+#################################### response
 
 
 class PedidoCreadoResponse(BaseModel):
@@ -115,3 +120,7 @@ class UserRegisted(BaseModel):
     id : int
     email : str
     role : str
+    
+class LoginResponse(BaseModel):
+    access_token  :str
+    refresh_token : str

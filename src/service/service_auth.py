@@ -1,8 +1,8 @@
 from src.infrastructure.repositorio_users import RepositorioUser,User
 from src.infrastructure.repositorio_clientes import RepositorioCliente,Cliente
 from psycopg2.extensions import connection
-from src.infrastructure.security import password
-from src.domain.exception import ExistentEmailError
+from src.infrastructure.security import password, jwt_handler
+from src.domain.exception import ExistentEmailError, InvalidCredentials
 class AuthService:
     def __init__(self, repositorio_users : RepositorioUser,repositorio_clientes : RepositorioCliente, conn : connection ):
         self.repositorio_users = repositorio_users
@@ -29,3 +29,22 @@ class AuthService:
             self.conn.rollback()
             raise
         
+        
+    ##############################################
+    
+    def login(self, email : str, _password : str):
+        
+        user = self.repositorio_users.get_user_by_mail(email)
+        if not user:
+            raise InvalidCredentials("credenciales invalidas")
+        
+        password_valid = password.verify_password(_password, user.hashed_password)
+        
+        if not password_valid:
+            raise InvalidCredentials("credenciales invalidas")
+
+
+        access_token = jwt_handler.create_access_token(user.id)
+        refresh_token = jwt_handler.create_refresh_token(user.id)
+        
+        return access_token, refresh_token

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from src.api.schemas import RegisterRequest, UserRegisted
+from src.api.schemas import RegisterRequest, UserRegisted,LoginRequest,LoginResponse
 from src.service.service_auth import AuthService
 from src.infrastructure.repositorio_users import User
 
@@ -14,4 +14,19 @@ def set_service(_service):
 def register(data : RegisterRequest):
     user = service.register(data.email, data.nombre,data.password)
     
-    return UserRegisted(id = user.id,email= user.email,role= user.role)
+    return UserRegisted(
+        id = user.id,
+        email= user.email,
+        role= user.role
+    )
+
+
+@router.post("/login", response_model=LoginResponse)
+def login(data : LoginRequest):
+    
+    access_token, refresh_token = service.login(data.email, data.password) 
+    
+    return LoginResponse(
+        access_token= access_token,
+        refresh_token=refresh_token
+    )
