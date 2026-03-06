@@ -11,6 +11,7 @@ from src.service.service_producto import ProductoService
 from src.domain.exception import DomainException, NotFound, AuthException
 from src.infrastructure.repositorio_users import RepositorioUser
 from src.service.service_auth import AuthService
+from src.api import auth_dependencies
 
 app = FastAPI()
 app.include_router(pedidos_router.router)
@@ -40,6 +41,7 @@ pedidos_router.set_service(pedido_service)
 clientes_router.set_service(cliente_service)
 productos_router.set_service(productos_service)
 auth_router.set_service(auth_service)
+auth_dependencies.set_service(auth_service)
 
 #### handlers ########
 

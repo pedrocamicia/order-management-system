@@ -2,7 +2,7 @@ from src.infrastructure.repositorio_users import RepositorioUser,User
 from src.infrastructure.repositorio_clientes import RepositorioCliente,Cliente
 from psycopg2.extensions import connection
 from src.infrastructure.security import password, jwt_handler
-from src.domain.exception import ExistentEmailError, InvalidCredentials
+from src.domain.exception import ExistentEmailError, InvalidCredentials,UserNotFound
 class AuthService:
     def __init__(self, repositorio_users : RepositorioUser,repositorio_clientes : RepositorioCliente, conn : connection ):
         self.repositorio_users = repositorio_users
@@ -48,3 +48,15 @@ class AuthService:
         refresh_token = jwt_handler.create_refresh_token(user.id)
         
         return access_token, refresh_token
+    
+    ######################################################
+    
+    def get_user(self, id):
+        user = self.repositorio_users.get_user_by_id(id)
+        
+        if user is None:
+            raise UserNotFound("usuario no encontrado")
+        
+        return user
+        
+      

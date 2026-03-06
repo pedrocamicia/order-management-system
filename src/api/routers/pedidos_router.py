@@ -1,6 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from src.api.schemas import PedidoCreadoResponse, PedidoCreateRequest, ModificarItemsPedidoRequest, PedidoDetalleResponse
 from src.service.service_pedido import PedidoService
+from src.domain.user import User
+from src.api.auth_dependencies import get_current_user
 
 router = APIRouter(tags=["Pedidos"])
 
@@ -10,7 +12,7 @@ def set_service(_service):
     service = _service
 
 @router.post("/pedidos", status_code=200,response_model=PedidoCreadoResponse)
-async def iniciar_pedido(data : PedidoCreateRequest):
+async def iniciar_pedido(data : PedidoCreateRequest, user : User = Depends(get_current_user)):
     pedido = service.iniciar_pedido(data.cliente_id)
     
     return PedidoCreadoResponse.from_domain(pedido)

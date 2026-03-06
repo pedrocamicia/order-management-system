@@ -1,6 +1,7 @@
-from jose import jwt
+from jose import jwt, ExpiredSignatureError, JWTError
 from datetime import datetime, timedelta, timezone
 from src.infrastructure.security.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE, SECRET_KEY, ALGORITHM
+from src.domain.exception import ExpiredTokenError, InvalidTokenError
 
 
 def create_access_token(user_id : int):
@@ -25,3 +26,15 @@ def create_refresh_token(user_id : int):
     
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
+
+def decode_access_token(token : str):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        
+        return payload
+    
+    except ExpiredSignatureError:
+        raise ExpiredTokenError("el token ingresado esta exirado, realice refresh o nuevo login")
+    
+    except JWTError:
+        raise InvalidTokenError("el token ingresado es invalido")

@@ -41,10 +41,19 @@ class ProductoNoExistenteError(NotFound):
 class ClienteNoExistente(NotFound):
     pass
 
+class UserNotFound(NotFound):
+    pass
+    
 ################################################
 
 class AuthException(Exception):
     pass
 
 class InvalidCredentials(AuthException):
+    pass
+
+class ExpiredTokenError(AuthException):
+    pass
+
+class InvalidTokenError(AuthException):
     pass

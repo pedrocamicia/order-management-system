@@ -116,7 +116,7 @@ class PaginationResponse(GenericModel, Generic[T]):
     limit : int
     total_pages : int
     
-class UserRegisted(BaseModel):
+class UserResponse(BaseModel):
     id : int
     email : str
     role : str
