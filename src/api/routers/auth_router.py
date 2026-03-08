@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from src.api.schemas import RegisterRequest, UserResponse,LoginRequest,LoginResponse
+from src.api.schemas import RegisterRequest, UserResponse,LoginRequest,LoginResponse, RefreshTokenResponse, RefreshTokenRequest
 from src.service.service_auth import AuthService
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -31,3 +31,10 @@ def login(data : LoginRequest):
     )
     
 
+@router.post("/refresh")
+def refresh_token(data: RefreshTokenRequest):
+    refresh_token = data.refresh_token
+    
+    access_token = service.refresh_token(refresh_token)
+    
+    return RefreshTokenResponse(access_token=access_token, token_type= "bearer")

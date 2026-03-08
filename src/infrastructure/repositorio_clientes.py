@@ -10,7 +10,6 @@ class RepositorioCliente:
         
         
         
-#esto fue agregado para test, luego borrar y mejorar si hace falta
 
     def crear_tabla_clientes(self):
         with self.conn.cursor() as cursor:
@@ -79,7 +78,9 @@ class RepositorioCliente:
             for r in rows:
                 cliente = Cliente(r[0], r[1])
                 clientes.append(cliente)
-                
-            total = rows[0][2]
+            
+            total = 0
+            if rows:
+                total = rows[0][2]
             
             return clientes, total

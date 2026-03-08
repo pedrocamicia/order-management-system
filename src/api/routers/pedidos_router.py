@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from src.api.schemas import PedidoCreadoResponse, PedidoCreateRequest, ModificarItemsPedidoRequest, PedidoDetalleResponse
 from src.service.service_pedido import PedidoService
 from src.domain.user import User
-from src.api.auth_dependencies import get_current_user
+from src.api.dependencies.auth import get_current_user
 
 router = APIRouter(tags=["Pedidos"])
 
