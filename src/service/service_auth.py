@@ -72,6 +72,9 @@ class AuthService:
         try:
             payload = jwt_handler.decode_access_token(refresh_token)
             
+            if payload.get("type") != "refresh":
+                raise InvalidCredentials("token invalido")
+            
             user_id = int(payload["sub"].strip("()").split(",")[0])
                     
             new_access_token = jwt_handler.create_access_token(user_id)
