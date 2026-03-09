@@ -69,11 +69,13 @@ class PedidoService:
         
 ############# agregar al carrito ########################################
         
-    def modificar_items_pedido(self, pedido_id,producto_id, cantidad):
+    def modificar_items_pedido(self, pedido_id,producto_id, cantidad, cliente_id):
         try:
             pedido : Pedido = self.repositorio_pedidos.get_pedido(pedido_id)
             producto : Producto = self.repositorio_productos.get_producto(producto_id)
-            
+                        
+            pedido.verify_owner(cliente_id)
+                        
             producto.disponible_para_venta(cantidad)
 
             pedido.set_cantidad(producto, cantidad)

@@ -6,9 +6,6 @@ from pydantic.generics import GenericModel
 
 T = TypeVar("T")
 
-class PedidoCreateRequest(BaseModel):
-    cliente_id : int
-
 class ClienteCreateRequest(BaseModel):
     nombre : str
 

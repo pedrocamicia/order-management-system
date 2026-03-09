@@ -1,6 +1,6 @@
 from datetime import datetime, date, timedelta
 from src.domain.item_pedido import ItemPedido
-from src.domain.exception import EstadoPedidoInvalido,CantidadInvalida,PedidoVacioInvalido
+from src.domain.exception import EstadoPedidoInvalido,CantidadInvalida,PedidoVacioInvalido,NoEsDuenoDeRecursoError
 
 class Pedido:
     def __init__(self, id : int | None,cliente_id : int):
@@ -76,6 +76,11 @@ class Pedido:
         
 ######################################################
 
+    def verify_owner(self, cliente_id):
+        if cliente_id != self.cliente_id:
+            raise NoEsDuenoDeRecursoError("el pedido ingresado no le corresponde al cliente")
+
+######################################################
     def total(self):
         total = 0
         for item in self.items:

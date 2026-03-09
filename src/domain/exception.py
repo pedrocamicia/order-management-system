@@ -57,3 +57,12 @@ class ExpiredTokenError(AuthException):
 
 class InvalidTokenError(AuthException):
     pass
+
+
+##################################################
+
+class AuthorizationError(Exception):
+    pass
+
+class NoEsDuenoDeRecursoError(AuthorizationError):
+    pass

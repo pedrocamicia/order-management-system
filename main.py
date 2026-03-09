@@ -8,7 +8,7 @@ from src.infrastructure.repositorio_productos import RepositorioProductos
 from src.service.service_pedido import PedidoService
 from src.service.service_cliente import ServiceCliente
 from src.service.service_producto import ProductoService
-from src.domain.exception import DomainException, NotFound, AuthException
+from src.domain.exception import DomainException, NotFound, AuthException, AuthorizationError
 from src.infrastructure.repositorio_users import RepositorioUser
 from src.service.service_auth import AuthService
 from src.api.dependencies import auth
@@ -64,4 +64,11 @@ async def auth_exception_handler(request : Request, exc : AuthException):
     return JSONResponse(
         status_code=401,
         content= {"detail": str(exc)}
+    )
+
+@app.exception_handler(AuthorizationError)
+async def authorization_exception_handler(request : Request, exc : AuthorizationError):
+    return JSONResponse(
+        status_code= 403,
+        content= {"detail" : str(exc)}
     )
