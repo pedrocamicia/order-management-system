@@ -2,12 +2,16 @@ from src.infrastructure.repositorio_clientes import RepositorioCliente
 from psycopg2.extensions import connection
 from src.domain.cliente import Cliente
 from src.service.pagination import Page, restricciones_paginacion
+from src.domain.exception import AuthorizationError
 
 class ServiceCliente:
     def __init__(self, repositorio_cliente : RepositorioCliente, conn : connection):
         self.repositorio_cliente = repositorio_cliente
         self.conn = conn
         
+    def _require_role(self, user):
+        if not user.role != "admin":
+            raise AuthorizationError("se requiere rol admin para acceder")
     
     def crear_cliente(self, cliente_nombre):
         try:
@@ -31,7 +35,10 @@ class ServiceCliente:
         except:
             raise
     
-    def get_clientes(self, limit, page, nombre):
+    def get_clientes(self, limit, page, nombre, user):
+        
+        self._require_role(user)
+        
         restricciones_paginacion(page, limit)
         offset = (page - 1)* limit
         

@@ -15,11 +15,11 @@ class PedidoService:
     
 ############ get pedido #########################################################
 
-    def get_pedido(self, pedido_id : int, cliente_id : int):
+    def get_pedido(self, pedido_id : int, user):
         try:
             pedido = self.repositorio_pedidos.get_pedido(pedido_id)
             
-            pedido.verify_owner(cliente_id)
+            pedido.verify_access(user.id , user.role)
 
             return pedido
         except:
@@ -43,11 +43,11 @@ class PedidoService:
 ############### confirmar pedido ################################################    
     
     
-    def confirmar_pedido(self, pedido_id, cliente_id : int):
+    def confirmar_pedido(self, pedido_id, user):
         try:
             pedido : Pedido= self.repositorio_pedidos.get_pedido(pedido_id)
 
-            pedido.verify_owner(cliente_id)
+            pedido.verify_access(user.id , user.role)
             
             for item in pedido.items:
                 producto = self.repositorio_productos.get_producto(item.producto_id)
@@ -73,12 +73,12 @@ class PedidoService:
         
 ############# agregar al carrito ########################################
         
-    def modificar_items_pedido(self, pedido_id,producto_id, cantidad, cliente_id):
+    def modificar_items_pedido(self, pedido_id,producto_id, cantidad, user):
         try:
             pedido : Pedido = self.repositorio_pedidos.get_pedido(pedido_id)
             producto : Producto = self.repositorio_productos.get_producto(producto_id)
                         
-            pedido.verify_owner(cliente_id)
+            pedido.verify_access(user.id , user.role)
                         
             producto.disponible_para_venta(cantidad)
 
@@ -96,12 +96,12 @@ class PedidoService:
 
 ##########  eliminar producto ####################
 
-    def eliminar_item(self, pedido_id, producto_id, cliente_id : int): 
+    def eliminar_item(self, pedido_id, producto_id, user): 
         try:
             producto = self.repositorio_productos.get_producto(producto_id)
             pedido = self.repositorio_pedidos.get_pedido(pedido_id)
             
-            pedido.verify_owner(cliente_id)
+            pedido.verify_access(user.id , user.role)
             
             pedido.eliminar_item(producto_id)
             

@@ -1,6 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from src.api.schemas import ClienteCreateRequest,ClienteResponse,PaginationResponse
 from src.service.service_cliente import ServiceCliente
+from src.api.dependencies.auth import get_current_user
 
 router = APIRouter(tags=["Cllientes"])
 
@@ -23,8 +24,8 @@ def get_cliente(cliente_id : int):
     return ClienteResponse.from_domain(cliente)
 
 @router.get("/clientes", status_code=200,response_model=PaginationResponse[ClienteResponse])
-def get_clientes(limit : int, page : int, nombre : str | None = None):
-    _page = service.get_clientes(limit, page, nombre)
+def get_clientes(limit : int, page : int, nombre : str | None = None, user = Depends(get_current_user)):
+    _page = service.get_clientes(limit, page, nombre, user)
     
     return PaginationResponse(
         items = [ClienteResponse.from_domain(cliente) for cliente in _page.items],

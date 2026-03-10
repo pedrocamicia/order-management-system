@@ -76,8 +76,8 @@ class Pedido:
         
 ######################################################
 
-    def verify_owner(self, cliente_id):
-        if cliente_id != self.cliente_id:
+    def verify_access(self, cliente_id, cliente_role):
+        if cliente_id != self.cliente_id and cliente_role != "admin":
             raise NoEsDuenoDeRecursoError("el pedido ingresado no le corresponde al cliente")
 
 ######################################################
