@@ -14,7 +14,7 @@ def get_current_user(token : str = Depends(oauth2_scheme)):
     
     payload = jwt_handler.decode_access_token(token)
         
-    user_id = int(payload["sub"].strip("()").split(",")[0]) #luego ver como arreglar esta mierda
+    user_id = int(payload["sub"])
 
     user = service.get_user(user_id)
     
