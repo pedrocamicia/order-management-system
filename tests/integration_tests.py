@@ -4,7 +4,7 @@ from src.domain.pedido import Pedido, Carrito,Confirmado
 from src.domain.producto import Producto, NoDisponible, Disponible
 from src.domain.item_pedido import ItemPedido
 from src.domain.cliente import Cliente
-from src.domain.exception import ProductoNoDisponible, CantidadDeProductoNoDisponibleEnStock, CantidadInvalida,EstadoPedidoInvalido,PedidoVacioInvalido
+from src.domain.exception import ProductoNoDisponible, CantidadDeProductoNoDisponibleEnStock, CantidadInvalida,EstadoPedidoInvalido,PedidoVacioInvalido, NoEsDuenoDeRecursoError
 from src.service.service_pedido import PedidoService
 from src.infrastructure.repositorio_pedidos import RepositorioPedidos
 from src.infrastructure.repositorio_productos import RepositorioProductos
@@ -13,6 +13,8 @@ from src.infrastructure.db_config import conectar
 from psycopg2.extensions import connection
 from src.infrastructure.repositorio_users import RepositorioUser
 from src.domain.user import User
+
+CLIENTE_PEDRO_ID = 1
 
 def crear_contexto():
     conn : connection= conectar() 
@@ -71,7 +73,7 @@ def test_modificar_items_pedido_a_pedido():
     try:
         conn, repo_pedidos, repo_productos, repo_clientes,pedido_service = crear_contexto()
         
-        pedido_service.modificar_items_pedido (1, 1, 5)
+        pedido_service.modificar_items_pedido(1, 1, 5, CLIENTE_PEDRO_ID)
 
         pedido_modificado = repo_pedidos.get_pedido(1)
         
@@ -79,8 +81,8 @@ def test_modificar_items_pedido_a_pedido():
         assert pedido_modificado.items[0].precio_unitario == 10
         assert pedido_modificado.items[0].producto_id == 1
         
-        pedido_service.modificar_items_pedido (1, 1, 10)
-        pedido_service.modificar_items_pedido (1,2,1)
+        pedido_service.modificar_items_pedido(1, 1, 10, CLIENTE_PEDRO_ID)
+        pedido_service.modificar_items_pedido(1, 2, 1, CLIENTE_PEDRO_ID)
         
         pedido_modificado2 = repo_pedidos.get_pedido(1)
 
@@ -103,7 +105,7 @@ def test_modificar_items_pedido_cantidad_negativa_falla():
         
 
         with pytest.raises(CantidadInvalida):
-            pedido_service.modificar_items_pedido (1, 1, -5)
+            pedido_service.modificar_items_pedido(1, 1, -5, CLIENTE_PEDRO_ID)
         pedido = repo_pedidos.get_pedido(1)
         
         assert len(pedido.items) == 0
@@ -119,7 +121,7 @@ def test_modificar_items_pedido_producto_no_disponible_falla():
         conn, repo_pedidos, repo_productos, repo_clientes,pedido_service = crear_contexto()
         
         with pytest.raises(ProductoNoDisponible):
-            pedido_service.modificar_items_pedido(1, 3, 5)
+            pedido_service.modificar_items_pedido(1, 3, 5, CLIENTE_PEDRO_ID)
 
             
         pedido = repo_pedidos.get_pedido(1)
@@ -137,7 +139,7 @@ def test_modificar_items_pedido_a_cantidad_mayor_a_stock_falla():
         conn, repo_pedidos, repo_productos, repo_clientes,pedido_service = crear_contexto()
         
         with pytest.raises(CantidadDeProductoNoDisponibleEnStock):
-            pedido_service.modificar_items_pedido(1, 2, 16)
+            pedido_service.modificar_items_pedido(1, 2, 16, CLIENTE_PEDRO_ID)
 
             
         pedido = repo_pedidos.get_pedido(1)
@@ -154,7 +156,7 @@ def test_modificar_items_pedido_a_pedido_confirmado_falla():
         conn, repo_pedidos, repo_productos, repo_clientes,pedido_service = crear_contexto()
         
         with pytest.raises(EstadoPedidoInvalido):
-            pedido_service.modificar_items_pedido(2, 2, 1)
+            pedido_service.modificar_items_pedido(2, 2, 1, CLIENTE_PEDRO_ID)
 
             
         pedido = repo_pedidos.get_pedido(2)
@@ -170,14 +172,14 @@ def test_modificar_con_cantidad_0_elimina_item():
     try:
         conn, repo_pedidos, repo_productos, repo_clientes,pedido_service = crear_contexto()
         
-        pedido_service.modificar_items_pedido(1, 1, 3)
+        pedido_service.modificar_items_pedido(1, 1, 3, CLIENTE_PEDRO_ID)
 
-        pedido = pedido_service.get_pedido(1)
+        pedido = pedido_service.get_pedido(1, CLIENTE_PEDRO_ID)
         assert pedido.items[0].cantidad == 3
         
-        pedido_service.modificar_items_pedido(1, 1, 0)
+        pedido_service.modificar_items_pedido(1, 1, 0, CLIENTE_PEDRO_ID)
             
-        pedido_actualizado = pedido_service.get_pedido(1)
+        pedido_actualizado = pedido_service.get_pedido(1, CLIENTE_PEDRO_ID)
         
         assert len(pedido_actualizado.items) == 0
         assert pedido_actualizado.total() == 0
@@ -189,12 +191,12 @@ def test_modificar_item_existente_en_pedido_falla_por_stock():
     try:
         conn, repo_pedidos, repo_productos, repo_clientes,pedido_service = crear_contexto()
         
-        pedido_service.modificar_items_pedido(1, 1, 3)
+        pedido_service.modificar_items_pedido(1, 1, 3, CLIENTE_PEDRO_ID)
 
         with pytest.raises(CantidadDeProductoNoDisponibleEnStock):
-            pedido_service.modificar_items_pedido(1, 1, 999)
+            pedido_service.modificar_items_pedido(1, 1, 999, CLIENTE_PEDRO_ID)
             
-        pedido = pedido_service.get_pedido(1)
+        pedido = pedido_service.get_pedido(1, CLIENTE_PEDRO_ID)
         assert pedido.items[0].cantidad == 3
         
     finally:
@@ -205,11 +207,11 @@ def test_modificar_item_existente_reduce_cantidad_en_pedido():
     try:
         conn, repo_pedidos, repo_productos, repo_clientes,pedido_service = crear_contexto()
         
-        pedido_service.modificar_items_pedido(1, 1, 3)
+        pedido_service.modificar_items_pedido(1, 1, 3, CLIENTE_PEDRO_ID)
 
-        pedido_service.modificar_items_pedido(1, 1, 2)
+        pedido_service.modificar_items_pedido(1, 1, 2, CLIENTE_PEDRO_ID)
             
-        pedido = pedido_service.get_pedido(1)
+        pedido = pedido_service.get_pedido(1, CLIENTE_PEDRO_ID)
         assert pedido.items[0].cantidad == 2
         
     finally:
@@ -221,7 +223,7 @@ def test_modificar_items_pedido_con_pedido_inexistente_falla():
 
         from src.domain.exception import PedidoNoExistenteError
         with pytest.raises(PedidoNoExistenteError):
-            pedido_service.modificar_items_pedido(999, 1, 1)
+            pedido_service.modificar_items_pedido(999, 1, 1, CLIENTE_PEDRO_ID)
 
     finally:
         limpiar_db(conn)
@@ -233,7 +235,7 @@ def test_modificar_items_pedido_con_producto_inexistente_falla():
 
         from src.domain.exception import ProductoNoExistenteError
         with pytest.raises(ProductoNoExistenteError):
-            pedido_service.modificar_items_pedido(1, 999, 1)
+            pedido_service.modificar_items_pedido(1, 999, 1, CLIENTE_PEDRO_ID)
 
     finally:
         limpiar_db(conn)
@@ -243,11 +245,11 @@ def test_modificar_items_pedido_pisa_cantidad_sin_acumular_varias_veces():
     try:
         conn, repo_pedidos, repo_productos, repo_clientes, pedido_service = crear_contexto()
 
-        pedido_service.modificar_items_pedido(1, 1, 7)
-        pedido_service.modificar_items_pedido(1, 1, 2)
-        pedido_service.modificar_items_pedido(1, 1, 6)
+        pedido_service.modificar_items_pedido(1, 1, 7, CLIENTE_PEDRO_ID)
+        pedido_service.modificar_items_pedido(1, 1, 2, CLIENTE_PEDRO_ID)
+        pedido_service.modificar_items_pedido(1, 1, 6, CLIENTE_PEDRO_ID)
 
-        pedido = pedido_service.get_pedido(1)
+        pedido = pedido_service.get_pedido(1, CLIENTE_PEDRO_ID)
         assert len(pedido.items) == 1
         assert pedido.items[0].producto_id == 1
         assert pedido.items[0].cantidad == 6
@@ -261,10 +263,10 @@ def test_confirmar_pedido():
     try:
         conn, repo_pedidos, repo_productos, repo_clientes,pedido_service = crear_contexto()
         
-        pedido_service.modificar_items_pedido(1,1,10) 
-        pedido_service.modificar_items_pedido(1,2,5)
+        pedido_service.modificar_items_pedido(1, 1, 10, CLIENTE_PEDRO_ID)
+        pedido_service.modificar_items_pedido(1, 2, 5, CLIENTE_PEDRO_ID)
 
-        pedido_service.confirmar_pedido(1)
+        pedido_service.confirmar_pedido(1, CLIENTE_PEDRO_ID)
         
         pedido = repo_pedidos.get_pedido(1)
         
@@ -286,8 +288,8 @@ def test_confirmar_pedido_con_producto_no_disponible_falla():
     try:
         conn, repo_pedidos, repo_productos, repo_clientes,pedido_service = crear_contexto()
         
-        pedido_service.modificar_items_pedido(1,1,10) 
-        pedido_service.modificar_items_pedido(1,2,5)
+        pedido_service.modificar_items_pedido(1, 1, 10, CLIENTE_PEDRO_ID)
+        pedido_service.modificar_items_pedido(1, 2, 5, CLIENTE_PEDRO_ID)
 
         #### seteo manzana no disponible
         manzana = repo_productos.get_producto(2)
@@ -296,7 +298,7 @@ def test_confirmar_pedido_con_producto_no_disponible_falla():
         ####
         
         with pytest.raises(ProductoNoDisponible):
-            pedido_service.confirmar_pedido(1)
+            pedido_service.confirmar_pedido(1, CLIENTE_PEDRO_ID)
         
         pedido = repo_pedidos.get_pedido(1)
         
@@ -318,8 +320,8 @@ def test_confirmar_pedido_falta_stock_falla():
     try:
         conn, repo_pedidos, repo_productos, repo_clientes,pedido_service = crear_contexto()
         
-        pedido_service.modificar_items_pedido(1,1,10) 
-        pedido_service.modificar_items_pedido(1,2,5)
+        pedido_service.modificar_items_pedido(1, 1, 10, CLIENTE_PEDRO_ID)
+        pedido_service.modificar_items_pedido(1, 2, 5, CLIENTE_PEDRO_ID)
 
         #### descontar stock de manzana
         manzana = repo_productos.get_producto(2)
@@ -328,7 +330,7 @@ def test_confirmar_pedido_falta_stock_falla():
         ############
         
         with pytest.raises(CantidadDeProductoNoDisponibleEnStock):
-            pedido_service.confirmar_pedido(1)
+            pedido_service.confirmar_pedido(1, CLIENTE_PEDRO_ID)
 
         pedido = repo_pedidos.get_pedido(1)
         
@@ -350,7 +352,7 @@ def test_confirmar_pedido_vacio_falla():
         conn, repo_pedidos, repo_productos, repo_clientes,pedido_service = crear_contexto()
         
         with pytest.raises(PedidoVacioInvalido):
-            pedido_service.confirmar_pedido(1)
+            pedido_service.confirmar_pedido(1, CLIENTE_PEDRO_ID)
 
         pedido = repo_pedidos.get_pedido(1)
         
@@ -371,12 +373,12 @@ def test_confirmar_pedido_confirmado_falla():
     try:
         conn, repo_pedidos, repo_productos, repo_clientes,pedido_service = crear_contexto()
         
-        pedido_service.modificar_items_pedido(1,1,5)
+        pedido_service.modificar_items_pedido(1, 1, 5, CLIENTE_PEDRO_ID)
         
-        pedido_service.confirmar_pedido(1)
+        pedido_service.confirmar_pedido(1, CLIENTE_PEDRO_ID)
         
         with pytest.raises(EstadoPedidoInvalido):
-            pedido_service.confirmar_pedido(1)
+            pedido_service.confirmar_pedido(1, CLIENTE_PEDRO_ID)
 
         pedido = repo_pedidos.get_pedido(1)
         
@@ -402,7 +404,7 @@ def test_get_pedido_inexistente_falla():
 
         from src.domain.exception import PedidoNoExistenteError
         with pytest.raises(PedidoNoExistenteError):
-            pedido_service.get_pedido(999)
+            pedido_service.get_pedido(999, CLIENTE_PEDRO_ID)
 
     finally:
         limpiar_db(conn)
@@ -450,10 +452,10 @@ def test_eliminar_item():
     try:
         conn, repo_pedidos, repo_productos, repo_clientes, pedido_service = crear_contexto()
 
-        pedido_service.modificar_items_pedido(1, 1, 3)
-        pedido_service.modificar_items_pedido(1, 2, 2)
+        pedido_service.modificar_items_pedido(1, 1, 3, CLIENTE_PEDRO_ID)
+        pedido_service.modificar_items_pedido(1, 2, 2, CLIENTE_PEDRO_ID)
 
-        pedido_service.eliminar_item(1, 1)
+        pedido_service.eliminar_item(1, 1, CLIENTE_PEDRO_ID)
 
         pedido_actualizado = repo_pedidos.get_pedido(1)
         assert len(pedido_actualizado.items) == 1
@@ -469,6 +471,70 @@ def test_eliminar_item():
             cantidad_items_producto_eliminado = cursor.fetchone()[0]
 
         assert cantidad_items_producto_eliminado == 0
+
+    finally:
+        limpiar_db(conn)
+
+
+def test_modificar_items_pedido_con_cliente_que_no_es_dueno_falla():
+    try:
+        conn, repo_pedidos, repo_productos, repo_clientes, pedido_service = crear_contexto()
+
+        with pytest.raises(NoEsDuenoDeRecursoError):
+            pedido_service.modificar_items_pedido(1, 1, 3, 999)
+
+        pedido = repo_pedidos.get_pedido(1)
+        assert len(pedido.items) == 0
+        assert pedido.total() == 0
+
+    finally:
+        limpiar_db(conn)
+
+
+def test_get_pedido_con_cliente_que_no_es_dueno_falla():
+    try:
+        conn, repo_pedidos, repo_productos, repo_clientes, pedido_service = crear_contexto()
+
+        with pytest.raises(NoEsDuenoDeRecursoError):
+            pedido_service.get_pedido(1, 999)
+
+    finally:
+        limpiar_db(conn)
+
+
+def test_confirmar_pedido_con_cliente_que_no_es_dueno_falla():
+    try:
+        conn, repo_pedidos, repo_productos, repo_clientes, pedido_service = crear_contexto()
+
+        pedido_service.modificar_items_pedido(1, 1, 5, CLIENTE_PEDRO_ID)
+
+        with pytest.raises(NoEsDuenoDeRecursoError):
+            pedido_service.confirmar_pedido(1, 999)
+
+        pedido = repo_pedidos.get_pedido(1)
+        assert isinstance(pedido.estado, Carrito)
+        assert pedido.fecha_confirmacion is None
+
+        banana = repo_productos.get_producto(1)
+        assert banana.stock == 20
+
+    finally:
+        limpiar_db(conn)
+
+
+def test_eliminar_item_con_cliente_que_no_es_dueno_falla():
+    try:
+        conn, repo_pedidos, repo_productos, repo_clientes, pedido_service = crear_contexto()
+
+        pedido_service.modificar_items_pedido(1, 1, 3, CLIENTE_PEDRO_ID)
+        pedido_service.modificar_items_pedido(1, 2, 2, CLIENTE_PEDRO_ID)
+
+        with pytest.raises(NoEsDuenoDeRecursoError):
+            pedido_service.eliminar_item(1, 1, 999)
+
+        pedido_actualizado = repo_pedidos.get_pedido(1)
+        assert len(pedido_actualizado.items) == 2
+        assert pedido_actualizado.total() == 40
 
     finally:
         limpiar_db(conn)

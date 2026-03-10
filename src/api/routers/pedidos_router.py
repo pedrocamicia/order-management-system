@@ -27,18 +27,20 @@ async def modificar_items_pedido(data : ModificarItemsPedidoRequest, pedido_id :
 
 
 @router.get("/pedidos/{pedido_id}", status_code=200, response_model=PedidoDetalleResponse)
-def get_pedido(pedido_id : int):
-    pedido = service.get_pedido(pedido_id)
+def get_pedido(pedido_id : int, user = Depends(get_current_user)):
+    
+    pedido = service.get_pedido(pedido_id, user.id)
     
     return PedidoDetalleResponse.from_domain(pedido)
 
 @router.patch("/pedidos/{pedido_id}/confirmar", status_code=200, response_model=PedidoDetalleResponse)
-def confirmar_pedido(pedido_id : int):
-    pedido = service.confirmar_pedido(pedido_id)
+def confirmar_pedido(pedido_id : int, user = Depends(get_current_user)):
+    
+    pedido = service.confirmar_pedido(pedido_id, user.id)
     
     return PedidoDetalleResponse.from_domain(pedido)
 
 @router.delete("/pedidos/{pedido_id}/items/{producto_id}", status_code= 204)
-def eliminar_item(pedido_id : int, producto_id : int):
-    service.eliminar_item(pedido_id, producto_id)
+def eliminar_item(pedido_id : int, producto_id : int, user = Depends(get_current_user)):
+    service.eliminar_item(pedido_id, producto_id, user.id)
     return

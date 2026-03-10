@@ -15,9 +15,11 @@ class PedidoService:
     
 ############ get pedido #########################################################
 
-    def get_pedido(self, pedido_id : int):
+    def get_pedido(self, pedido_id : int, cliente_id : int):
         try:
             pedido = self.repositorio_pedidos.get_pedido(pedido_id)
+            
+            pedido.verify_owner(cliente_id)
 
             return pedido
         except:
@@ -41,10 +43,12 @@ class PedidoService:
 ############### confirmar pedido ################################################    
     
     
-    def confirmar_pedido(self, pedido_id):
+    def confirmar_pedido(self, pedido_id, cliente_id : int):
         try:
             pedido : Pedido= self.repositorio_pedidos.get_pedido(pedido_id)
 
+            pedido.verify_owner(cliente_id)
+            
             for item in pedido.items:
                 producto = self.repositorio_productos.get_producto(item.producto_id)
                 producto.disponible_para_venta(item.cantidad)
@@ -92,10 +96,12 @@ class PedidoService:
 
 ##########  eliminar producto ####################
 
-    def eliminar_item(self, pedido_id, producto_id): 
+    def eliminar_item(self, pedido_id, producto_id, cliente_id : int): 
         try:
             producto = self.repositorio_productos.get_producto(producto_id)
             pedido = self.repositorio_pedidos.get_pedido(pedido_id)
+            
+            pedido.verify_owner(cliente_id)
             
             pedido.eliminar_item(producto_id)
             
