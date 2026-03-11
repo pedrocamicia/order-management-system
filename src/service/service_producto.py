@@ -1,19 +1,26 @@
 from src.infrastructure.repositorio_productos import RepositorioProductos
 from psycopg2.extensions import connection
 from src.domain.producto import Producto
-import math
 from src.service.pagination import Page, restricciones_paginacion
+from src.domain.exception import AuthorizationError
 
 class ProductoService:
     def __init__(self, repositorio_productos : RepositorioProductos, conn : connection):
         self.repositorio_productos = repositorio_productos
         self.conn = conn
         
+    def _require_role(self, user):
+        if not user.role != "admin":
+            raise AuthorizationError("se requiere rol admin para acceder")
         
-    def crear_producto(self, nombre : str, precio:int, stock : int):
+###############################################################################################        
+        
+    def crear_producto(self, nombre : str, precio:int, stock : int, user):
         try:
             producto = Producto(None, nombre, precio, stock)
 
+            self._require_role(user)
+            
             nuevo_producto = self.repositorio_productos.guardar_producto(producto)
             self.conn.commit()
             

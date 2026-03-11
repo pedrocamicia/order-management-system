@@ -2,7 +2,7 @@ from src.infrastructure.repositorio_clientes import RepositorioCliente
 from psycopg2.extensions import connection
 from src.domain.cliente import Cliente
 from src.service.pagination import Page, restricciones_paginacion
-from src.domain.exception import AuthorizationError
+from src.domain.exception import AuthorizationError, NoEsDuenoDeRecursoError
 
 class ServiceCliente:
     def __init__(self, repositorio_cliente : RepositorioCliente, conn : connection):
@@ -26,9 +26,12 @@ class ServiceCliente:
             raise
         
     
-    def get_cliente(self, cliente_id : int):
+    def get_cliente(self, cliente_id : int, user):
         try:
             cliente = self.repositorio_cliente.get_cliente(cliente_id)
+            
+            if cliente_id != user.id and user.role != "admin":
+                raise NoEsDuenoDeRecursoError("no puede acceder si no es su perfil o su rol no es admin")
             
             return cliente
         

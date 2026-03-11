@@ -1,6 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from src.api.schemas import ProductoResponse, ProductoCreateRequest,PaginationResponse
 from src.service.service_producto import ProductoService
+from src.api.dependencies.auth import get_current_user
+
 
 router = APIRouter(tags=["Productos"])
 
@@ -11,8 +13,8 @@ def set_service(_service):
     
 
 @router.post("/productos", status_code=201, response_model=ProductoResponse)
-def crear_producto(data : ProductoCreateRequest):
-    producto = service.crear_producto(data.nombre, data.precio, data.stock)
+def crear_producto(data : ProductoCreateRequest, user = Depends(get_current_user)):
+    producto = service.crear_producto(data.nombre, data.precio, data.stock, user)
     
     return ProductoResponse.from_domain(producto)
 
