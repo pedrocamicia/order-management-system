@@ -1,170 +1,256 @@
 # Order Management System
 
-This project is a backend Order Management System built using Domain-Driven Design principles.
+Backend de gestión de pedidos desarrollado con FastAPI y PostgreSQL, 
+siguiendo una arquitectura en capas inspirada en Domain-Driven Design (DDD).
 
-It allows clients to:
+Incluye autenticación con JWT, control de acceso por roles, 
+reglas de negocio sobre pedidos y validación de stock.
 
-Create orders
+El sistema permite:
 
-Add and modify products in a cart
+- Registrar usuarios y autenticarlos con JWT
+- Crear y consultar pedidos
+- Agregar, modificar y eliminar items de un pedido
+- Confirmar pedidos con validacion de stock
+- Consultar clientes y productos con paginacion y filtros
+- Aplicar permisos segun rol (`customer` y `admin`)
 
-Confirm orders
+## Stack y tecnologias
 
-Manage stock consistently
+- Python
+- FastAPI
+- PostgreSQL
+- psycopg2
+- JWT con `python-jose`
+- Variables de entorno con `python-dotenv`
+- Pytest para tests
+- Arquitectura en capas con separacion `domain`, `service`, `infrastructure` y `api`
 
-The system includes a fully functional REST API, persistence using PostgreSQL, and unit/integration tests.
+## Arquitectura
 
-## Architecture
+El proyecto esta organizado en las siguientes capas:
 
-The project follows a layered architecture:
+- `src/domain`: entidades, reglas de negocio y excepciones del dominio
+- `src/service`: casos de uso y coordinacion entre dominio y persistencia
+- `src/infrastructure`: acceso a base de datos, repositorios y seguridad
+- `src/api`: routers, schemas y dependencias de FastAPI
 
-Domain Layer
-Contains business logic, entities, aggregates, and validation rules.
+## Funcionalidad actual
 
-Service Layer
-Orchestrates use cases and coordinates domain and repositories.
+### Autenticacion y usuarios
 
-Infrastructure Layer
-Handles persistence with PostgreSQL repositories.
+- `POST /auth/register`: registra un usuario y crea su cliente asociado
+- `POST /auth/login`: devuelve `access_token` y `refresh_token`
+- `POST /auth/refresh`: genera un nuevo `access_token` a partir del refresh token
 
-API Layer (FastAPI)
-Exposes REST endpoints and maps domain objects to DTOs.
+La autenticacion se realiza con bearer token. Los endpoints protegidos esperan `Authorization: Bearer <token>`.
 
-This separation ensures clean boundaries between business logic and infrastructure concerns.
+### Pedidos
 
-## Core Domain Concepts
+- Crear pedido
+- Consultar detalle de pedido
+- Agregar o actualizar cantidad de un producto en un pedido
+- Eliminar un item de un pedido
+- Confirmar pedido
 
-### Aggregates
+Reglas principales:
 
-**Pedido (Order)**– Aggregate Root
-Manages order state, items, and business validations.
+- Un pedido solo puede modificarse en estado `carrito`
+- Un pedido no puede confirmarse si esta vacio
+- El stock se valida antes de modificar o confirmar
+- El stock se descuenta unicamente al confirmar
+- Si la cantidad de un item pasa a `0`, el item se elimina del pedido
+- Un usuario solo puede acceder a sus propios pedidos, salvo `admin`
 
-**Producto (Product)** – Independent Aggregate
-Manages availability and stock.
+### Productos
 
-**Cliente (Client)** – Independent Aggregate
+- Crear producto
+- Obtener producto por id
+- Listar productos con paginacion
+- Filtrar productos por `estado`, `min_price` y `max_price`
 
-### Order States:
+### Clientes
 
-Carrito (Cart)
+- Obtener cliente por id
+- Listar clientes con paginacion
+- Filtrar clientes por `nombre`
 
-Confirmado (Confirmed)
+## Roles y permisos
 
-Orders can only be modified while in Carrito state.
+### `customer`
 
-## Features
+- Puede registrarse e iniciar sesion
+- Puede crear y gestionar sus propios pedidos
+- Puede ver su propio perfil de cliente
 
-### Orders
+### `admin`
 
-Create order
+- Puede crear productos
+- Puede listar clientes
+- Puede acceder a recursos de otros usuarios cuando la regla de negocio lo permite
 
-Modify product quantity in order
+## Endpoints
 
-Remove product from order
+### Auth
 
-Confirm order (with stock validation and deduction)
+- `POST /auth/register`
+- `POST /auth/login`
+- `POST /auth/refresh`
 
-Retrieve order details
+### Clientes
 
-### Products
+- `GET /clientes/{cliente_id}`
+- `GET /clientes?limit=10&page=1&nombre=ped`
 
-Create product
+Notas:
 
-Retrieve signle product
+- Requieren autenticacion
+- `GET /clientes` requiere rol `admin`
+- `GET /clientes/{cliente_id}` permite acceso al propio perfil o a `admin`
 
-List products with pagination and dynamic filters
+### Productos
 
-### Clients
+- `POST /productos`
+- `GET /productos/{producto_id}`
+- `GET /productos?limit=10&page=1&estado=disponible&min_price=10&max_price=100`
 
-Create client
+Notas:
 
-Retrieve client
+- `POST /productos` requiere rol `admin`
+- Las consultas de listado permiten paginacion y filtros
 
-List products with pagination and dynamic filters
+### Pedidos
 
-## Business Rules
+- `POST /pedidos`
+- `GET /pedidos/{pedido_id}`
+- `PATCH /pedidos/{pedido_id}/items`
+- `PATCH /pedidos/{pedido_id}/confirmar`
+- `DELETE /pedidos/{pedido_id}/items/{producto_id}`
 
-An order cant be confirmed if empty.
+Notas:
 
-An order cant be modified if is confirmed.
+- Todos requieren autenticacion
+- El acceso al pedido esta restringido al dueno del recurso o `admin`
 
-Stock and product state is validated before confirmation or modification.
+## Request bodies principales
 
-Stock is deducted only upon confirmation.
+### Registro
 
-Product quantity cannot be negative.
+```json
+{
+  "email": "user@mail.com",
+  "password": "123456",
+  "nombre": "Pedro"
+}
+```
 
-If quantity becomes zero, the item is removed from the order.
+### Login
 
-## API Endpoints
+```json
+{
+  "email": "user@mail.com",
+  "password": "123456"
+}
+```
 
-### Clients
+### Crear producto
 
-POST /clientes
+```json
+{
+  "nombre": "Banana",
+  "precio": 10,
+  "stock": 20
+}
+```
 
-GET /clientes/{id}
+### Modificar item de pedido
 
-GET /clientes
+```json
+{
+  "producto_id": 1,
+  "cantidad": 3
+}
+```
 
-- Pagination (limit/page)
- 
-- Dynamic filters (nombre) 
+## Variables de entorno
 
-### Products
+Configura un archivo `.env` con al menos estas variables:
 
-POST /productos
+```env
+DB_HOST=
+DB_PORT=
+DB_NAME=
+DB_USER=
+DB_PASSWORD=
+SECRET_KEY=
+```
 
-GET /productos/{id}
+`SECRET_KEY` se usa para firmar los tokens JWT.
 
-GET /productos
+## Ejecucion local
 
-- Pagination (limit/page)
+### 1. Crear entorno virtual
 
-- Dynamic filters (estado, min_price, max_price) 
+```bash
+python -m venv .venv
+```
 
+### 2. Activarlo
 
-### Orders
+En Windows PowerShell:
 
-POST /pedidos
+```powershell
+.venv\Scripts\Activate.ps1
+```
 
-GET /pedidos/{id}
+### 3. Instalar dependencias
 
-PATCH /pedidos/{pedido_id}/items
+```bash
+pip install fastapi uvicorn psycopg2 python-dotenv python-jose[cryptography] pytest
+```
 
-PATCH /pedidos/{pedido_id}/confirmar
+Si el modulo de hashing no esta instalado en tu entorno, agrega tambien la libreria correspondiente usada por `src/infrastructure/security/password.py`.
 
-## Technologies Used
+### 4. Configurar PostgreSQL
 
-Python
+- Crear una base de datos vacia
+- Completar las variables del archivo `.env`
 
-FastAPI
+### 5. Levantar la API
 
-PostgreSQL
-
-psycopg2
-
-Pytest
-
-## How to Run
-
-Configure environment variables for database connection, in file ".env.example".
-
-Run the application:
-
+```bash
 uvicorn main:app --reload
+```
 
-Access API docs at:
+Documentacion interactiva:
 
-http://localhost:8000/docs
+- `http://localhost:8000/docs`
+
+## Base de datos
+
+Al iniciar la aplicacion se abre la conexion y se crean las tablas necesarias si no existen.
+
+Ese bootstrap ocurre desde `main.py`.
 
 ## Tests
 
-### Run tests using:
+El proyecto incluye tests unitarios e integracion.
 
-'pytest'
+Para ejecutarlos:
 
-The project includes:
+```bash
+pytest
+```
 
-Unit tests for domain logic
+## Estructura del proyecto
 
-Integration tests for services and persistence
+```text
+.
++-- main.py
++-- src
+|   +-- api
+|   +-- domain
+|   +-- infrastructure
+|   +-- service
++-- tests
+```
