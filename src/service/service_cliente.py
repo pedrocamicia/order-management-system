@@ -10,7 +10,7 @@ class ServiceCliente:
         self.conn = conn
         
     def _require_role(self, user):
-        if not user.role != "admin":
+        if user.role != "admin":
             raise AuthorizationError("se requiere rol admin para acceder")
     
     def crear_cliente(self, cliente_nombre):
